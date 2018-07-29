@@ -119,7 +119,7 @@ def pca(dir, h5_group_path, weights, epochs):
     weights = np.stack(weights, axis=0)
     u, s, vh = np.linalg.svd(weights, full_matrices=False)
     coordinates = np.dot(weights, vh[0:10].T)
-    return coordinates
+    return s[0:10], coordinates
 
 
 def calc(data, optimizer, norm, lr, epochs, iteration):
@@ -130,8 +130,10 @@ def calc(data, optimizer, norm, lr, epochs, iteration):
 
     coordinates = []
     weights = [np.array(init_weight)]
-    coordinates = pca(dir, f'model_weights/sequential_{iteration}/dense_{iteration}/',
+    s, coordinates = pca(dir, f'model_weights/sequential_{iteration}/dense_{iteration}/',
                       weights, epochs)
 
     with open(f'{dir}/store.pkl', 'wb') as f:
         pickle.dump([coordinates, history.history, init_loss], f)
+    with open(f'{dir}/sv.pkl', 'wb') as f:
+        pickle.dump(s, f)
