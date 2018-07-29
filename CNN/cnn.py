@@ -21,7 +21,6 @@ import os
 from os import path
 
 n_classes = 10
-batch_size = 128 * 4
 summary_file = './summary'
 seed(1)
 set_random_seed(2)
@@ -49,7 +48,7 @@ def build_cnn_model(input_shape):
     return model
 
 
-def train(dir, optimizer='SGD', norm='maxmin', lr=1e-2, data='fashion_mnist', epochs=100, iteration=1):
+def train(dir, optimizer, norm, lr, data, epochs, iteration, batch_size):
     # the data, shuffled and split between train and test sets
     if data == 'fashion_mnist':
         (X_train, y_train), (X_test, y_test) = fashion_mnist.load_data()
@@ -104,10 +103,11 @@ def train(dir, optimizer='SGD', norm='maxmin', lr=1e-2, data='fashion_mnist', ep
     return init_weight, init_loss, history
 
 
-def calc(data, optimizer, norm, lr, epochs, iteration):
-    dir = f'{data}-weights-{optimizer}-{lr}-{norm}'
+def calc(data, optimizer, norm, lr, epochs, iteration, batch_size):
+    dir = f'{batch_size}-weights-{optimizer}-{lr}-{norm}'
     init_weight, init_loss, history = train(dir=dir, data=data, optimizer=optimizer,
-                                            norm=norm, lr=lr, epochs=epochs, iteration=iteration)
+                                            norm=norm, lr=lr, epochs=epochs, iteration=iteration,
+                                            batch_size=batch_size)
 
     prefix = f'/model_weights/sequential_{iteration}/'
     weights = {}

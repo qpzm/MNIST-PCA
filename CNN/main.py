@@ -3,29 +3,23 @@ import sys
 sys.path.append('../')
 from plotter import plot
 from cnn import calc
+from utils import recursive_mkdir
 import os
-from os.path import dirname
 
 
 epochs = 50
 norm='maxmin'
+gpus = 4
+data = 'fashion_mnist'
 configs = {
-    'data': ['mnist', 'fashion_mnist'],
     'optimizer': ['SGD', 'Adam'],
-    'lr': [1e-2, 1e-3],
+    'lr': [1e-3, 1e-4],
+    'batch_size': [128, 1024]
 }
 
-def recursive_mkdir(path):
-    parent = dirname(path)
-    if not os.path.exists(parent):
-        recursive_mkdir(parent)
-    if not os.path.exists(path):
-        os.mkdir(path)
-
-
-def calc_and_plot(data, optimizer, norm, lr, epochs, iteration):
-    calc(data, optimizer, norm, lr, epochs, iteration)
-    data_dir = f'{data}-weights-{optimizer}-{lr}-{norm}'
+def calc_and_plot(data, optimizer, norm, lr, epochs, iteration, batch_size):
+    data_dir = f'{batch_size}-weights-{optimizer}-{lr}-{norm}'
+    calc(data, optimizer, norm, lr, epochs, iteration, batch_size)
     plot_parent_dir = './plots'
     for i in range(0, 4):
         data_path = f'{data_dir}/store-{i}.pkl'
@@ -35,15 +29,12 @@ def calc_and_plot(data, optimizer, norm, lr, epochs, iteration):
 
 def main():
     iteration = 0
-    threads = []
-    for data in configs['data']:
+    for batch_size in configs['batch_size']:
+        batch_size = batch_size * gpus
         for optimizer in configs['optimizer']:
                 for lr in configs['lr']:
                     iteration += 1
-                    # t = Thread(target=calc_and_plot, args=(data, optimizer, norm, lr, epochs, iteration))
-                    # t.start()
-                    calc_and_plot(data, optimizer, norm, lr, epochs, iteration)
-                    #threads.append(t)
+                    calc_and_plot(data, optimizer, norm, lr, epochs, iteration, batch_size)
 
 if __name__ == '__main__':
     main()
